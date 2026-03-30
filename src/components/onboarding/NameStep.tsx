@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 
 interface NameStepProps {
   active?: boolean
@@ -8,9 +8,11 @@ interface NameStepProps {
 export function NameStep({ active, onValidChange }: NameStepProps) {
   const [name, setName] = useState("")
 
-  useEffect(() => {
-    onValidChange(name.trim().length > 0)
-  }, [name, onValidChange])
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value
+    setName(val)
+    onValidChange(val.trim().length > 0)
+  }
 
   return (
     <div className="flex flex-col flex-1 pt-4">
@@ -24,7 +26,7 @@ export function NameStep({ active, onValidChange }: NameStepProps) {
         type="text"
         placeholder="Name"
         value={name}
-        onChange={(e) => setName(e.target.value)}
+        onChange={handleChange}
         autoFocus={active}
         className="mt-8 w-full h-12 text-base bg-transparent outline-none placeholder:text-muted-foreground"
       />

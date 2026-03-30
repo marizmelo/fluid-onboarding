@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef } from "react"
 
 interface VerifyStepProps {
   active?: boolean
@@ -10,14 +10,13 @@ export function VerifyStep({ active, onValidChange }: VerifyStepProps) {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
 
   const handleChange = (index: number, value: string) => {
-    if (value.length > 1) {
-      value = value.slice(-1)
-    }
+    if (value.length > 1) value = value.slice(-1)
     if (!/^\d*$/.test(value)) return
 
     const newCode = [...code]
     newCode[index] = value
     setCode(newCode)
+    onValidChange(newCode.every((d) => d !== ""))
 
     if (value && index < 5) {
       inputRefs.current[index + 1]?.focus()
@@ -29,12 +28,6 @@ export function VerifyStep({ active, onValidChange }: VerifyStepProps) {
       inputRefs.current[index - 1]?.focus()
     }
   }
-
-  const isComplete = code.every((d) => d !== "")
-
-  useEffect(() => {
-    onValidChange(isComplete)
-  }, [isComplete, onValidChange])
 
   return (
     <div className="flex flex-col flex-1 pt-4">
