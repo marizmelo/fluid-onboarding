@@ -1,9 +1,4 @@
 import { useRef, useEffect, useCallback } from "react"
-import { Button } from "@/components/ui/button"
-
-interface AgeStepProps {
-  onNext: () => void
-}
 
 const days = Array.from({ length: 31 }, (_, i) => i + 1)
 const months = [
@@ -56,7 +51,6 @@ function ScrollPicker({ items, defaultIndex = 0 }: { items: (string | number)[];
     return () => container.removeEventListener("scroll", updateStyles)
   }, [updateStyles])
 
-  // Mouse drag to scroll
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     isDragging.current = true
     startY.current = e.clientY
@@ -75,7 +69,6 @@ function ScrollPicker({ items, defaultIndex = 0 }: { items: (string | number)[];
       if (!isDragging.current) return
       isDragging.current = false
       document.body.style.userSelect = ""
-      // Snap to nearest item
       if (scrollRef.current) {
         const index = Math.round(scrollRef.current.scrollTop / ITEM_HEIGHT)
         scrollRef.current.scrollTo({ top: index * ITEM_HEIGHT, behavior: "smooth" })
@@ -92,13 +85,9 @@ function ScrollPicker({ items, defaultIndex = 0 }: { items: (string | number)[];
 
   return (
     <div className="relative h-[220px] flex-1">
-      {/* Selection indicator */}
       <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[44px] border-t border-b border-muted-foreground/10 pointer-events-none z-10" />
-      {/* Top fade */}
       <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-white to-transparent pointer-events-none z-10" />
-      {/* Bottom fade */}
       <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-white to-transparent pointer-events-none z-10" />
-      {/* Scrollable area */}
       <div
         ref={scrollRef}
         onMouseDown={handleMouseDown}
@@ -125,29 +114,19 @@ function ScrollPicker({ items, defaultIndex = 0 }: { items: (string | number)[];
   )
 }
 
-export function AgeStep({ onNext }: AgeStepProps) {
+export function AgeStep() {
   return (
     <div className="flex flex-col flex-1 pt-4">
-      <div className="flex-1">
-        <h2 className="text-2xl font-bold tracking-tight">
-          Enter your age
-        </h2>
-        <p className="text-muted-foreground text-sm mt-4">
-          We'll use this to personalize<br />your experience
-        </p>
-        <div className="flex gap-0 mt-8">
-          <ScrollPicker items={days} defaultIndex={17} />
-          <ScrollPicker items={months} defaultIndex={9} />
-          <ScrollPicker items={years} defaultIndex={1} />
-        </div>
-      </div>
-      <div className="pb-4">
-        <Button
-          onClick={onNext}
-          className="w-full h-12 rounded-full text-base font-medium"
-        >
-          Next
-        </Button>
+      <h2 className="text-2xl font-bold tracking-tight">
+        Enter your age
+      </h2>
+      <p className="text-muted-foreground text-sm mt-4">
+        We'll use this to personalize<br />your experience
+      </p>
+      <div className="flex gap-0 mt-8">
+        <ScrollPicker items={days} defaultIndex={17} />
+        <ScrollPicker items={months} defaultIndex={9} />
+        <ScrollPicker items={years} defaultIndex={1} />
       </div>
     </div>
   )

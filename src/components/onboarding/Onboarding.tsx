@@ -1,5 +1,6 @@
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { ChevronLeft, X } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { StatusBar } from "./StatusBar"
 import { StepIndicator } from "./StepIndicator"
 import { WelcomeStep } from "./WelcomeStep"
@@ -9,32 +10,48 @@ import { AgeStep } from "./AgeStep"
 import { NameStep } from "./NameStep"
 
 const TOTAL_STEPS = 5
+const BUTTON_LABELS = ["Get Started", "Next", "Next", "Next", "Next"]
 
 export function Onboarding() {
   const [step, setStep] = useState(0)
   const [resetKey, setResetKey] = useState(0)
   const [fading, setFading] = useState(false)
+  const [, forceRender] = useState(0)
 
-  const goNext = () => setStep((s) => Math.min(s + 1, TOTAL_STEPS - 1))
-  const goBack = () => setStep((s) => Math.max(s - 1, 0))
-  const restart = () => {
-    setFading(true)
-    setTimeout(() => {
-      setStep(0)
-      setResetKey((k) => k + 1)
-      setTimeout(() => setFading(false), 50)
-    }, 400)
+  // Store validity in a ref to avoid render loops, force render only on change
+  const validRef = useRef<Record<number, boolean>>({ 0: true, 3: true })
+
+  const setValid = (index: number, valid: boolean) => {
+    if (validRef.current[index] !== valid) {
+      validRef.current[index] = valid
+      forceRender((n) => n + 1)
+    }
   }
+
+  const goNext = () => {
+    if (step === TOTAL_STEPS - 1) {
+      setFading(true)
+      setTimeout(() => {
+        setStep(0)
+        setResetKey((k) => k + 1)
+        validRef.current = { 0: true, 3: true }
+        setTimeout(() => setFading(false), 50)
+      }, 400)
+      return
+    }
+    setStep((s) => Math.min(s + 1, TOTAL_STEPS - 1))
+  }
+
+  const goBack = () => setStep((s) => Math.max(s - 1, 0))
+
+  const isCurrentValid = validRef.current[step] ?? false
 
   return (
     <div className="flex items-center justify-center min-h-[100dvh] bg-neutral-100 p-4">
       <div className="w-full max-w-[390px] h-[844px] bg-white rounded-[3rem] relative shadow-xl border border-neutral-200 overflow-hidden">
-        {/* iPhone status bar */}
         <StatusBar />
 
-        {/* Inner safe area container */}
         <div className="absolute top-14 left-6 right-6 bottom-10 flex flex-col">
-          {/* Header */}
           <div className="flex items-center justify-between pb-2 z-10 shrink-0">
             {step > 0 ? (
               <button
@@ -52,7 +69,6 @@ export function Onboarding() {
             <div className="w-9" />
           </div>
 
-          {/* Carousel */}
           <div className="flex-1 relative">
             <div
               key={resetKey}
@@ -73,18 +89,27 @@ export function Onboarding() {
                     transition: "opacity 0.35s ease",
                   }}
                 >
-                  {i === 0 && <WelcomeStep onGetStarted={goNext} />}
-                  {i === 1 && <PhoneStep onNext={goNext} active={step === 1} />}
-                  {i === 2 && <VerifyStep onNext={goNext} active={step === 2} />}
-                  {i === 3 && <AgeStep onNext={goNext} />}
-                  {i === 4 && <NameStep onNext={() => { alert("Onboarding complete!"); restart(); }} active={step === 4} />}
+                  {i === 0 && <WelcomeStep />}
+                  {i === 1 && <PhoneStep active={step === 1} onValidChange={(v) => setValid(1, v)} />}
+                  {i === 2 && <VerifyStep active={step === 2} onValidChange={(v) => setValid(2, v)} />}
+                  {i === 3 && <AgeStep />}
+                  {i === 4 && <NameStep active={step === 4} onValidChange={(v) => setValid(4, v)} />}
                 </div>
               ))}
             </div>
           </div>
+
+          <div className="shrink-0 pt-4">
+            <Button
+              onClick={goNext}
+              disabled={!isCurrentValid}
+              className="w-full h-12 rounded-full text-base font-medium disabled:opacity-40"
+            >
+              {BUTTON_LABELS[step]}
+            </Button>
+          </div>
         </div>
 
-        {/* Fade overlay for restart transition */}
         <div
           className="absolute inset-0 bg-white z-50 pointer-events-none"
           style={{
@@ -93,7 +118,6 @@ export function Onboarding() {
           }}
         />
 
-        {/* iPhone home indicator */}
         <div className="absolute bottom-3 left-0 right-0 flex justify-center">
           <div className="w-[134px] h-[5px] bg-black rounded-full" />
         </div>

@@ -1,9 +1,8 @@
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
 
 interface PhoneStepProps {
-  onNext: () => void
   active?: boolean
+  onValidChange: (valid: boolean) => void
 }
 
 function formatPhone(value: string): string {
@@ -17,44 +16,33 @@ function formatPhone(value: string): string {
   return `+${countryCode} (${rest.slice(0, 3)}) ${rest.slice(3, 6)}-${rest.slice(6)}`
 }
 
-export function PhoneStep({ onNext, active }: PhoneStepProps) {
+export function PhoneStep({ active, onValidChange }: PhoneStepProps) {
   const [phone, setPhone] = useState("")
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value.replace(/\D/g, "")
-    setPhone(formatPhone(raw))
+    const formatted = formatPhone(raw)
+    setPhone(formatted)
+    onValidChange(raw.length >= 11)
   }
-
-  const digits = phone.replace(/\D/g, "")
 
   return (
     <div className="flex flex-col flex-1 pt-4">
-      <div className="flex-1">
-        <h2 className="text-2xl font-bold tracking-tight">
-          Enter your phone number
-        </h2>
-        <p className="text-muted-foreground text-sm mt-4">
-          We'll send a verification code<br />to this phone number
-        </p>
-        <input
-          type="tel"
-          inputMode="numeric"
-          placeholder="+1 (555) 012-3456"
-          value={phone}
-          onChange={handleChange}
-          autoFocus={active}
-          className="mt-8 w-full h-12 text-base bg-transparent outline-none placeholder:text-muted-foreground"
-        />
-      </div>
-      <div className="pb-4">
-        <Button
-          onClick={onNext}
-          disabled={digits.length < 10}
-          className="w-full h-12 rounded-full text-base font-medium disabled:opacity-40"
-        >
-          Next
-        </Button>
-      </div>
+      <h2 className="text-2xl font-bold tracking-tight">
+        Enter your phone number
+      </h2>
+      <p className="text-muted-foreground text-sm mt-4">
+        We'll send a verification code<br />to this phone number
+      </p>
+      <input
+        type="tel"
+        inputMode="numeric"
+        placeholder="+1 (555) 012-3456"
+        value={phone}
+        onChange={handleChange}
+        autoFocus={active}
+        className="mt-8 w-full h-12 text-base bg-transparent outline-none placeholder:text-muted-foreground"
+      />
     </div>
   )
 }
